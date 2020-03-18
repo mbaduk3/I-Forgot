@@ -1,0 +1,21 @@
+{
+  "name": "I-Forgot",
+  "version": "1.0.0",
+  "description": "I forgot...",
+  "repository": "https://github.com/mbaduk3/I-Forgot.git",
+  "author": "Maxim Baduk",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "babel-core": "6",
+    "babel-loader": "^7.0.0",
+    "babel-preset-env": "^1.7.0",
+    "copy-webpack-plugin": "^5.1.1",
+    "webpack": "^4.0.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  },
+  "dependencies": {
+    "phaser": "^3.0.0"
+  }
+}
