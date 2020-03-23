@@ -7,17 +7,20 @@ class BearNPC extends Phaser.GameObjects.GameObject {
         this.x = x;
         this.y = y;
         this.canInteract = false;
+        this.dialogPointer = 0;
     }
 
     static preload(scene) {
         scene.load.spritesheet('bear_sheet', 'assets/Bear.png', {frameWidth: 16, frameHeight: 16});
-    }
+        scene.load.json('testJson', 'assets/Dialog/test.json');
+    } 
 
     create() {
         // Interact
         this.interact_sprite = this.scene.add.sprite(this.x, this.y - 16, 'interact');
         this.interact_sprite.play('interact');
         this.interact_sprite.setVisible(false);
+        this.interact_sprite.depth = 1000;
 
         // Physics
         this.sprite = this.scene.physics.add.sprite(this.x, this.y, 'bear_sheet');
@@ -65,13 +68,30 @@ class BearNPC extends Phaser.GameObjects.GameObject {
             repeat: -1
         });
         this.sprite.play('bear_walk_left');
+
+        // Input key
+        this.key_x = this.scene.input.keyboard.addKey("x");
+
+        // Dialog
+        this.dialog = this.scene.cache.json.get('testJson');
     }
 
     update() {
         if (this.canInteract) {
             this.interact_sprite.setVisible(true);
+            if (Phaser.Input.Keyboard.JustDown(this.key_x)) {
+                this.interact();
+            }
         } else {
             this.interact_sprite.setVisible(false);
+        }
+    }
+
+    interact() {
+        console.log(this.dialog.text[this.dialogPointer]);
+        this.dialogPointer = this.dialogPointer + 1;
+        if (this.dialogPointer >= this.dialog.text.length) {
+            this.dialogPointer = 0;
         }
     }
 }

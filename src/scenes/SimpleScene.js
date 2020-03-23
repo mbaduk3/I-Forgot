@@ -44,10 +44,6 @@ export class SimpleScene extends Phaser.Scene {
         this.cameras.main.setZoom(3.5);
         this.key_q = this.input.keyboard.addKey("q");
         this.key_x = this.input.keyboard.addKey("x");
-
-        // this.physics.add.overlap(this.player.interactRect, this.npcGroup, function (p, npcSprite) {
-        //     npcSprite.parent.interact_sprite.setVisible(true);
-        // });
     }
 
     update() {
@@ -57,16 +53,14 @@ export class SimpleScene extends Phaser.Scene {
             this.scene.start("MainMenuScene");
         }
 
-        if (Phaser.Input.Keyboard.JustDown(this.key_x)) {
-            console.log(this.player.interactRect);
-        }
-
         this.npcGroup.getChildren().forEach((npcSprite) => {
+            // Overlap
             if (this.physics.overlap(this.player.interactRect, npcSprite)) {
                 npcSprite.parent.canInteract = true;
             } else {
                 npcSprite.parent.canInteract = false;
             }
+            // Update
             npcSprite.parent.update();
         });
 
