@@ -22,35 +22,35 @@
                 {
                  "height":0,
                  "id":1,
-                 "name":"",
+                 "name":"Bear",
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":285.105989077108,
-                 "y":73.1278348606868
+                 "x":285.106,
+                 "y":73.1278
                 }, 
                 {
                  "height":0,
                  "id":2,
-                 "name":"",
+                 "name":"Mouse",
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":59.7056373229658,
-                 "y":59.2428029251134
+                 "x":59.7056,
+                 "y":59.2428
                 }, 
                 {
                  "height":0,
                  "id":3,
-                 "name":"",
+                 "name":"Bear",
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":131.907803387948,
-                 "y":244.839396463945
+                 "x":131.908,
+                 "y":244.839
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -59,7 +59,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":4,
+ "nextobjectid":6,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.2.3",
@@ -68,7 +68,7 @@
         {
          "columns":3,
          "firstgid":1,
-         "image":"..\/forest_tiles.png",
+         "image":"..\/Sprites\/forest_tiles.png",
          "imageheight":48,
          "imagewidth":48,
          "margin":0,

@@ -1,5 +1,5 @@
 import Player from "../characters/Player";
-import BearNPC from '../characters/BearNPC'
+import NPC from "../characters/NPC";
 
 export class SimpleScene extends Phaser.Scene {
 
@@ -10,9 +10,10 @@ export class SimpleScene extends Phaser.Scene {
     preload() {
         this.player = new Player(this);
         this.player.preload();
-        BearNPC.preload(this);
-        this.load.image('forest_map_tiles', 'assets/forest_tiles.png');
-        this.load.spritesheet('interact_x', 'assets/Interact.png', {frameWidth: 16, frameHeight: 16});
+        NPC.preload(this, "Bear");
+        NPC.preload(this, "Mouse");
+        this.load.image('forest_map_tiles', 'assets/Sprites/forest_tiles.png');
+        this.load.spritesheet('interact_x', 'assets/Sprites/Interact.png', {frameWidth: 16, frameHeight: 16});
         this.load.tilemapTiledJSON('forest_map', 'assets/Maps/forest_map.json');
     }
 
@@ -32,7 +33,8 @@ export class SimpleScene extends Phaser.Scene {
             repeat: -1,
         });
         map.getObjectLayer('NPC').objects.forEach((obj) => {
-            let npc = new BearNPC(this, obj.x, obj.y);
+            console.log(obj);
+            let npc = new NPC(obj.name, this, obj.x, obj.y);
             npc.create();
             this.npcArr.push(npc);
             this.npcGroup.add(npc.sprite);

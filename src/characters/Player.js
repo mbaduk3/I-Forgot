@@ -9,7 +9,7 @@ class Player {
     }
 
     preload() {
-        this.scene.load.spritesheet('hedgehog_sheet', 'assets/Hedgehog.png', {frameWidth: 16, frameHeight: 16});
+        this.scene.load.spritesheet('hedgehog_sheet', 'assets/Sprites/Hedgehog.png', {frameWidth: 16, frameHeight: 16});
     }
 
     create() {

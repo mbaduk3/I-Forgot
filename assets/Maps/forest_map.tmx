@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.3" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="4">
+<map version="1.2" tiledversion="1.2.3" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="6">
  <tileset firstgid="1" name="forest_tiles" tilewidth="16" tileheight="16" tilecount="9" columns="3">
-  <image source="../forest_tiles.png" width="48" height="48"/>
+  <image source="../Sprites/forest_tiles.png" width="48" height="48"/>
  </tileset>
  <layer id="1" name="Base" width="20" height="20">
   <data encoding="base64">
@@ -9,8 +9,8 @@
   </data>
  </layer>
  <objectgroup id="2" name="NPC">
-  <object id="1" x="285.106" y="73.1278"/>
-  <object id="2" x="59.7056" y="59.2428"/>
-  <object id="3" x="131.908" y="244.839"/>
+  <object id="1" name="Bear" x="285.106" y="73.1278"/>
+  <object id="2" name="Mouse" x="59.7056" y="59.2428"/>
+  <object id="3" name="Bear" x="131.908" y="244.839"/>
  </objectgroup>
 </map>
