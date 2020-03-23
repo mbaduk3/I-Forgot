@@ -58,11 +58,34 @@ class Player {
             repeat: -1
         });
         this.sprite.play('hedgehog_idle_down');
-        
+
+
+        // Interact rec 
+        this.interactRect = this.scene.add.rectangle(this.sprite.x, this.sprite.y + this.sprite.height / 2, this.sprite.width, this.sprite.height);
+        this.scene.physics.add.existing(this.interactRect);
+        this.interactRect.body.setOffset(this.interactRect.width / 2, this.interactRect.height / 2);
     }
 
     update() {
 
+        // Update depth
+        this.sprite.depth = this.sprite.y;
+
+        // Update interact rect
+        switch (this.direction) {
+            case "up":
+                this.interactRect.setPosition(this.sprite.x - this.sprite.width / 2, this.sprite.y - this.sprite.height);
+                break;
+            case "down":
+                this.interactRect.setPosition(this.sprite.x - this.sprite.width / 2, this.sprite.y + this.sprite.height / 2);
+                break;
+            case "left": 
+                this.interactRect.setPosition(this.sprite.x - this.sprite.width - 5, this.sprite.y - this.sprite.height / 2);
+                break;
+            case "right": 
+                this.interactRect.setPosition(this.sprite.x + 5, this.sprite.y - this.sprite.height / 2);
+                break;
+        }
         // Handle input
         if (!this.cur_keys.up.isDown && !this.cur_keys.down.isDown && !this.cur_keys.left.isDown && !this.cur_keys.right.isDown) {
             this.state = "idle";
