@@ -24,7 +24,7 @@ export class SimpleScene extends Phaser.Scene {
         this.physics.world.bounds.setTo(0, 0, 16*20, 16*20);
         this.fpsTxt = this.add.text(this.cameras.main.x, this.cameras.main.y, this.game.loop.actualFps);
 
-        this.npcGroup = this.physics.add.group({allowGravity: false});
+        this.npcGroup = this.physics.add.staticGroup({allowGravity: false});
         this.npcArr = [];
         this.anims.create({
             key: 'interact', 
@@ -33,17 +33,19 @@ export class SimpleScene extends Phaser.Scene {
             repeat: -1,
         });
         map.getObjectLayer('NPC').objects.forEach((obj) => {
-            console.log(obj);
             let npc = new NPC(obj.name, this, obj.x, obj.y);
             npc.create();
+            console.log(npc);
             this.npcArr.push(npc);
             this.npcGroup.add(npc.sprite);
         });
         this.player.create();
+        this.physics.add.collider(this.player.sprite, this.npcGroup);
 
         this.cur_keys = this.input.keyboard.createCursorKeys();
         this.cameras.main.startFollow(this.player.sprite);
         this.cameras.main.setZoom(3.5);
+        this.cameras.main.setLerp(0.3, 0.3);
         this.key_q = this.input.keyboard.addKey("q");
         this.key_x = this.input.keyboard.addKey("x");
     }

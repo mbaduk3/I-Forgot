@@ -27,10 +27,11 @@ class NPC extends Phaser.GameObjects.GameObject {
         this.key_x = this.scene.input.keyboard.addKey("x");
 
         // Physics
-        this.sprite = this.scene.physics.add.sprite(this.x, this.y, this.name + '_sprite_' + this.id);
+        this.sprite = this.scene.physics.add.staticSprite(this.x, this.y, this.name + '_sprite_' + this.id);
         this.sprite.body.setSize(10, 8);
-        this.sprite.body.setOffset(3, 8);
-        this.sprite.setCollideWorldBounds(true);
+        // this.sprite.body.setOffset(3, 8);
+        this.sprite.body.setOffset(11, 16);
+
         this.sprite.depth = this.sprite.y;
         this.sprite.parent = this;
 
@@ -71,7 +72,7 @@ class NPC extends Phaser.GameObjects.GameObject {
             frameRate: 8,
             repeat: -1
         });
-        this.sprite.play(this.name + '_walk_left');
+        this.sprite.play(this.name + '_idle_down');
 
         // Dialog
         this.dialog = this.scene.cache.json.get(this.name + '_json');
