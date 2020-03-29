@@ -1,5 +1,6 @@
 class NPC extends Phaser.GameObjects.GameObject {
 
+
     constructor(name, scene, x, y, id) {
         super(scene, 'npc');
         this.name = name;
@@ -9,6 +10,9 @@ class NPC extends Phaser.GameObjects.GameObject {
         this.canInteract = false;
         this.dialogPointer = 0;
         this.npcId = id;
+        this.speed = 30;
+        this.state = "idle";
+        this.direction = "down";
     }
 
     static preload(scene, name) {
@@ -27,13 +31,7 @@ class NPC extends Phaser.GameObjects.GameObject {
         this.key_x = this.scene.input.keyboard.addKey("x");
 
         // Physics
-        this.sprite = this.scene.physics.add.staticSprite(this.x, this.y, this.name + '_sprite_' + this.id);
-        this.sprite.body.setSize(10, 8);
-        // this.sprite.body.setOffset(3, 8);
-        this.sprite.body.setOffset(11, 16);
-
-        this.sprite.depth = this.sprite.y;
-        this.sprite.parent = this;
+        this.sprite = this.scene.physics.add.sprite(this.x, this.y, this.name + '_sprite_' + this.id);
 
         // Anims
         this.scene.anims.create({
@@ -76,6 +74,31 @@ class NPC extends Phaser.GameObjects.GameObject {
 
         // Dialog
         this.dialog = this.scene.cache.json.get(this.name + '_json');
+
+        // Random walk
+        let delay = Math.floor(Math.random() * 2000);
+        let startAt = Math.floor(Math.random() * delay);
+        let randomWalkConfig = {
+            delay: delay,
+            startAt: startAt,
+            loop: true,
+            callback: () => this.randomWalk()
+        }
+        this.scene.time.addEvent(randomWalkConfig);
+    }
+
+    /* Phaser wipes npc data after you add it to a group? So this sets stuff 
+       after it is added.
+    */
+    afterGroupCreate() {
+        this.sprite.body.setSize(10, 8);
+        this.sprite.body.setOffset(3, 8);
+        this.sprite.body.setCollideWorldBounds(true);
+        this.sprite.body.immovable = true;
+        // this.sprite.body.setOffset(11, 16);
+
+        this.sprite.depth = this.sprite.y;
+        this.sprite.parent = this;
     }
 
     update() {
@@ -87,6 +110,18 @@ class NPC extends Phaser.GameObjects.GameObject {
         } else {
             this.interact_sprite.setVisible(false);
         }
+
+        // Update anims
+        let mod_direction= this.direction;
+        if (this.direction === "right") mod_direction = "left";
+        this.sprite.play(this.name + "_" + this.state+ "_" + mod_direction, true);
+        if (this.direction === "right") {
+            this.sprite.setFlipX(true);
+        } else if (this.direction === "left") {
+            this.sprite.setFlipX(false);
+        }
+
+        this.interact_sprite.setPosition(this.sprite.x, this.sprite.y - 16);
     }
 
     interact() {
@@ -95,6 +130,35 @@ class NPC extends Phaser.GameObjects.GameObject {
         if (this.dialogPointer >= this.dialog.text.length) {
             this.dialogPointer = 0;
         }
+    }
+
+    randomWalk() {
+        this.state = "idle";
+        this.sprite.setVelocity(0, 0);
+        let move = Math.floor(Math.random() * 2);
+        if (move == 1) {
+            this.state = "walk";
+            let dir = Math.floor(Math.random() * 5);
+            switch (dir) {
+                case 0: // Left
+                    this.sprite.setVelocity(-this.speed, 0);
+                    this.direction = "left";
+                    break;
+                case 1: // Right
+                    this.sprite.setVelocity(this.speed, 0);
+                    this.direction = "right";
+                    break;
+                case 2: // Up
+                    this.sprite.setVelocity(0, -this.speed);
+                    this.direction = "up";
+                    break;
+                case 3: // Down
+                    this.sprite.setVelocity(0, this.speed);
+                    this.direction = "down";
+                    break;
+            }
+        }
+        this.sprite.depth = this.sprite.y;
     }
 
 }

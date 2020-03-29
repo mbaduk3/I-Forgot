@@ -1,15 +1,20 @@
 import Player from "../characters/Player";
 import NPC from "../characters/NPC";
+import Portal from '../objects/Portal'
 
 export class SimpleScene extends Phaser.Scene {
 
     constructor() {
-        super("SimpleScene")
+        super({
+            key: "SimpleScene",
+            plugins: ['Loader', 'InputPlugin', 'Clock', 'TweenManager', 'DataManager']
+        });
+        console.log(this);
     }
 
     preload() {
         this.player = new Player(this);
-        this.player.preload();
+        Player.preload();
         NPC.preload(this, "Bear");
         NPC.preload(this, "Mouse");
         this.load.image('forest_map_tiles', 'assets/Sprites/forest_tiles.png');
@@ -24,8 +29,9 @@ export class SimpleScene extends Phaser.Scene {
         this.physics.world.bounds.setTo(0, 0, 16*20, 16*20);
         this.fpsTxt = this.add.text(this.cameras.main.x, this.cameras.main.y, this.game.loop.actualFps);
 
-        this.npcGroup = this.physics.add.staticGroup({allowGravity: false});
+        this.npcGroup = this.physics.add.group({allowGravity: false});
         this.npcArr = [];
+        this.portalsArr = [];
         this.anims.create({
             key: 'interact', 
             frames: this.anims.generateFrameNames('interact_x', {start: 0, end: 1}),
@@ -33,14 +39,27 @@ export class SimpleScene extends Phaser.Scene {
             repeat: -1,
         });
         map.getObjectLayer('NPC').objects.forEach((obj) => {
-            let npc = new NPC(obj.name, this, obj.x, obj.y);
+            let npc = new NPC(obj.name, this, obj.x, obj.y, obj.id);
             npc.create();
             console.log(npc);
             this.npcArr.push(npc);
             this.npcGroup.add(npc.sprite);
+            npc.afterGroupCreate();
         });
         this.player.create();
         this.physics.add.collider(this.player.sprite, this.npcGroup);
+
+        map.getObjectLayer('Portals').objects.forEach((obj) => {
+            console.log(obj);
+            let portal = new Portal(obj.x, obj.y, obj.width, obj.height, obj.name);
+            this.portalsArr.push(portal);
+            this.scene.add(obj.name, {
+                key: obj.name,
+                active: false,
+                visible: false,
+                plugins: ['Loader', 'InputPlugin', 'Clock', 'TweenManager', 'DataManager'],
+            });
+        })
 
         this.cur_keys = this.input.keyboard.createCursorKeys();
         this.cameras.main.startFollow(this.player.sprite);
@@ -48,6 +67,7 @@ export class SimpleScene extends Phaser.Scene {
         this.cameras.main.setLerp(0.3, 0.3);
         this.key_q = this.input.keyboard.addKey("q");
         this.key_x = this.input.keyboard.addKey("x");
+        console.log(this.scene);
     }
 
     update() {

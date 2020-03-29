@@ -1,12 +1,13 @@
 import 'phaser'
 import { MainMenuScene } from './scenes/MainMenuScene'
 import { SimpleScene } from './scenes/SimpleScene';
+import GameScene from './scenes/GameScene';
 
 const gameConfig = {
     width: 680,
     height: 400,
     pixelArt: true,
-    scene: [MainMenuScene, SimpleScene],
+    scene: [MainMenuScene],
     physics: {
         default: "arcade",
         arcade: {
@@ -18,4 +19,4 @@ const gameConfig = {
     }
 };
 
-new Phaser.Game(gameConfig);
+var game = new Phaser.Game(gameConfig);

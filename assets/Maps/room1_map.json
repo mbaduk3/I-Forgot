@@ -57,9 +57,59 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":3,
+         "name":"Portals",
+         "objects":[
+                {
+                 "height":114.59,
+                 "id":6,
+                 "name":"room2",
+                 "properties":[
+                        {
+                         "name":"to",
+                         "type":"string",
+                         "value":"room2"
+                        }],
+                 "rotation":0,
+                 "type":"spawn_1",
+                 "visible":false,
+                 "width":8.57896,
+                 "x":310.068,
+                 "y":113.978
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":4,
+         "name":"Player_Spawns",
+         "objects":[
+                {
+                 "height":0,
+                 "id":7,
+                 "name":"spawn_1",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":288.620626263864,
+                 "y":163.612966480789
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":3,
- "nextobjectid":6,
+ "nextlayerid":5,
+ "nextobjectid":8,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.2.3",
@@ -72,7 +122,20 @@
          "imageheight":48,
          "imagewidth":48,
          "margin":0,
-         "name":"forest_tiles",
+         "name":"room1_tiles",
+         "spacing":0,
+         "tilecount":9,
+         "tileheight":16,
+         "tilewidth":16
+        }, 
+        {
+         "columns":3,
+         "firstgid":10,
+         "image":"..\/Sprites\/room1_tiles.png",
+         "imageheight":48,
+         "imagewidth":48,
+         "margin":0,
+         "name":"room1_tiles",
          "spacing":0,
          "tilecount":9,
          "tileheight":16,

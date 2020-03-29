@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.3" orientation="orthogonal" renderorder="right-down" width="12" height="8" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="5">
+ <tileset firstgid="1" name="forest_tiles" tilewidth="16" tileheight="16" tilecount="9" columns="3">
+  <image source="../Sprites/forest_tiles.png" width="48" height="48"/>
+ </tileset>
+ <layer id="1" name="Base" width="12" height="8">
+  <data encoding="base64">
+   AQAAAAIAAAACAAAAAgAAAAIAAAACAAAAAgAAAAIAAAACAAAAAgAAAAIAAAADAAAABAAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAGAAAABAAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAGAAAABAAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAGAAAABAAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAGAAAABAAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAGAAAABAAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAGAAAABwAAAAgAAAAIAAAACAAAAAgAAAAIAAAACAAAAAgAAAAIAAAACAAAAAgAAAAJAAAA
+  </data>
+ </layer>
+ <objectgroup id="3" name="NPC"/>
+ <objectgroup id="2" name="Portals">
+  <object id="1" name="room1" type="spawn_1" x="0.53516" y="23.0119" width="6.95708" height="78.6685">
+   <properties>
+    <property name="to_room" value="room1"/>
+   </properties>
+  </object>
+  <object id="4" x="43.2882" y="99.3082" height="0.424394"/>
+ </objectgroup>
+ <objectgroup id="4" name="Player_Spawns">
+  <object id="2" name="spawn_1" x="21.4064" y="61.5434"/>
+ </objectgroup>
+</map>

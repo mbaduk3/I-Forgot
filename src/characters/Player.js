@@ -1,21 +1,31 @@
 class Player {
 
-    constructor(scene) {
+    /* 
+    TODO: Make the player object transferable between scenes.
+    */
+
+    constructor(scene, x, y) {
         this.scene = scene;
+        this.prevScene = null;
         this.direction = "down";
         this.speed = 130;
         this.state = "idle";
         this.cur_keys = scene.input.keyboard.createCursorKeys();
+        this.x = x;
+        this.y = y;
+        this.justSpawned = true;
+        this.targetSpawn = null;
     }
 
-    preload() {
-        this.scene.load.spritesheet('hedgehog_sheet', 'assets/Sprites/Hedgehog.png', {frameWidth: 16, frameHeight: 16});
+    static preload(scene) {
+        scene.load.spritesheet('hedgehog_sheet', 'assets/Sprites/Hedgehog.png', {frameWidth: 16, frameHeight: 16});
     }
 
     create() {
 
         // Physics
-        this.sprite = this.scene.physics.add.sprite(100, 100, 'hedgehog_sheet');
+        this.sprite = this.scene.physics.add.sprite(this.x, this.y, 'hedgehog_sheet');
+        this.scene.playerSprite = this.sprite;
         this.sprite.body.setSize(10, 8);
         this.sprite.body.setOffset(3, 8);
         this.sprite.setCollideWorldBounds(true);
@@ -64,12 +74,19 @@ class Player {
         this.interactRect = this.scene.add.rectangle(this.sprite.x, this.sprite.y + this.sprite.height / 2, this.sprite.width, this.sprite.height);
         this.scene.physics.add.existing(this.interactRect);
         this.interactRect.body.setOffset(this.interactRect.width / 2, this.interactRect.height / 2);
+
+        // Input keys
+        this.cur_keys = this.scene.input.keyboard.createCursorKeys();
     }
 
     update() {
-
         // Update depth
         this.sprite.depth = this.sprite.y;
+
+        if (this.justSpawned) {
+            this.sprite = this.scene.playerSprite;
+            this.cur_keys = this.scene.input.keyboard.createCursorKeys();
+        }
 
         // Update interact rect
         switch (this.direction) {
@@ -86,6 +103,7 @@ class Player {
                 this.interactRect.setPosition(this.sprite.x + 5, this.sprite.y - this.sprite.height / 2);
                 break;
         }
+
         // Handle input
         if (!this.cur_keys.up.isDown && !this.cur_keys.down.isDown && !this.cur_keys.left.isDown && !this.cur_keys.right.isDown) {
             this.state = "idle";
@@ -146,17 +164,35 @@ class Player {
                     break;
             }
         }
-    }
 
-    setState(state) {
-        this.state = state;
-    }
+        // Does the player position need to be reset (just spawned)?
+        if (this.justSpawned && this.targetSpawn != null) {
+            let spawn = this.scene.playerSpawns[this.targetSpawn]
+            this.x = spawn.x;
+            this.sprite.x = spawn.x;
+            this.y = spawn.y;
+            this.sprite.y = spawn.y;
+            this.state = "idle";
+            this.sprite.setVelocity(0, 0);
+            this.justSpawned = false;
+        } else {
+            // Check portals collisions 
+            this.scene.portalsArr.forEach((portal) => {
+                if (Phaser.Geom.Rectangle.Overlaps(this.sprite.getBounds(), portal)) {
+                    this.justSpawned = true;
+                    let old_scene = this.scene;
+                    this.prevScene = old_scene;
+                    this.scene = this.scene.scene.get(portal.to_room);
+                    this.targetSpawn = portal.to_spawn;
+                    // Before we put to sleep, reset all input.
+                    old_scene.scene.run(portal.to_room);
+                    old_scene.scene.sleep(old_scene.name);
+                }
+            });
+        }
 
-    setDirection(dir) {
-        this.direction = dir;
     }
-
 
 }
 
-export default Player
+export default Player;
