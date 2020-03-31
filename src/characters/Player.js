@@ -10,11 +10,17 @@ class Player {
         this.direction = "down";
         this.speed = 130;
         this.state = "idle";
-        this.cur_keys = scene.input.keyboard.createCursorKeys();
         this.x = x;
         this.y = y;
         this.justSpawned = true;
         this.targetSpawn = null;
+        this.skipInput = false;
+        this.isDown = {
+            "up": false,
+            "down": false,
+            "left": false,
+            "right": false
+        }
     }
 
     static preload(scene) {
@@ -29,6 +35,8 @@ class Player {
         this.sprite.body.setSize(10, 8);
         this.sprite.body.setOffset(3, 8);
         this.sprite.setCollideWorldBounds(true);
+        this.scene.input.enable(this.sprite);
+        this.scene.input.enableDebug(this);
 
         // Animations 
         this.scene.anims.create({
@@ -70,23 +78,54 @@ class Player {
         this.sprite.play('hedgehog_idle_down');
 
 
-        // Interact rec 
+        // Interact rect
         this.interactRect = this.scene.add.rectangle(this.sprite.x, this.sprite.y + this.sprite.height / 2, this.sprite.width, this.sprite.height);
         this.scene.physics.add.existing(this.interactRect);
         this.interactRect.body.setOffset(this.interactRect.width / 2, this.interactRect.height / 2);
+        this.scene.interactRect = this.interactRect;
 
-        // Input keys
-        this.cur_keys = this.scene.input.keyboard.createCursorKeys();
     }
 
-    update() {
+    update(cursorKeys) {
+
+        /* Does the player position need to be reset, so as to not trigger 
+           the portal again? (just spawned)? */
+        if (this.justSpawned) {
+            this.sprite = this.scene.playerSprite; // Each scene has its own player sprite.
+            this.interactRect = this.scene.interactRect; // Each scene has its own interactRect.
+            this.skipInput = true;
+            if (this.targetSpawn != null) {
+                let spawn = this.scene.playerSpawns[this.targetSpawn]
+                this.x = spawn.x;
+                this.sprite.x = spawn.x;
+                this.y = spawn.y;
+                this.sprite.y = spawn.y;
+            }
+            this.justSpawned = false;
+        } else {
+            // Check portals collisions 
+            this.scene.portalsArr.forEach((portal) => {
+                if (Phaser.Geom.Rectangle.Overlaps(this.sprite.getBounds(), portal)) {
+                    this.justSpawned = true;
+                    this.sprite.setVelocity(0, 0);
+                    this.state = "idle";
+                    let old_scene = this.scene;
+                    this.prevScene = old_scene;
+                    this.scene = this.scene.scene.get(portal.to_room);
+                    this.targetSpawn = portal.to_spawn;
+                    // Before we put to sleep, reset cursor keys.
+                    old_scene.cur_keys.up.reset();
+                    old_scene.cur_keys.down.reset();
+                    old_scene.cur_keys.left.reset();
+                    old_scene.cur_keys.right.reset();
+                    old_scene.scene.run(portal.to_room);
+                    old_scene.scene.sleep(old_scene.name);
+                }
+            });
+        }
+        
         // Update depth
         this.sprite.depth = this.sprite.y;
-
-        if (this.justSpawned) {
-            this.sprite = this.scene.playerSprite;
-            this.cur_keys = this.scene.input.keyboard.createCursorKeys();
-        }
 
         // Update interact rect
         switch (this.direction) {
@@ -105,23 +144,12 @@ class Player {
         }
 
         // Handle input
-        if (!this.cur_keys.up.isDown && !this.cur_keys.down.isDown && !this.cur_keys.left.isDown && !this.cur_keys.right.isDown) {
-            this.state = "idle";
-        } else {
-            this.state = "walk";
-            if (Phaser.Input.Keyboard.JustDown(this.cur_keys.up)) {
-                this.direction = "up";
-            }
-            else if (Phaser.Input.Keyboard.JustDown(this.cur_keys.down)) {
-                this.direction = "down";
-            }
-            else if (Phaser.Input.Keyboard.JustDown(this.cur_keys.left)) {
-                this.direction = "left";
-            }
-            else if (Phaser.Input.Keyboard.JustDown(this.cur_keys.right)) {
-                this.direction = "right";
-            }
-        }
+        // if (this.skipInput) {
+        //     this.skipInput = !this.skipInput
+        // } else {
+        //     this.handleInput();
+        // }
+        this.handleInput(cursorKeys);
 
         // Update anims
         if (this.state == "idle") {
@@ -164,33 +192,29 @@ class Player {
                     break;
             }
         }
+    }
 
-        // Does the player position need to be reset (just spawned)?
-        if (this.justSpawned && this.targetSpawn != null) {
-            let spawn = this.scene.playerSpawns[this.targetSpawn]
-            this.x = spawn.x;
-            this.sprite.x = spawn.x;
-            this.y = spawn.y;
-            this.sprite.y = spawn.y;
+    // Adjusts state and direction based on cursor key input. 
+    handleInput(cursorKeys) {
+        if (!cursorKeys.up && !cursorKeys.down && !cursorKeys.left && !cursorKeys.right) {
             this.state = "idle";
-            this.sprite.setVelocity(0, 0);
-            this.justSpawned = false;
         } else {
-            // Check portals collisions 
-            this.scene.portalsArr.forEach((portal) => {
-                if (Phaser.Geom.Rectangle.Overlaps(this.sprite.getBounds(), portal)) {
-                    this.justSpawned = true;
-                    let old_scene = this.scene;
-                    this.prevScene = old_scene;
-                    this.scene = this.scene.scene.get(portal.to_room);
-                    this.targetSpawn = portal.to_spawn;
-                    // Before we put to sleep, reset all input.
-                    old_scene.scene.run(portal.to_room);
-                    old_scene.scene.sleep(old_scene.name);
-                }
-            });
+            this.state = "walk";
+            if (cursorKeys.up) {
+                this.direction = "up";
+            } else if (cursorKeys.down) {
+                this.direction = "down";
+            } else if (cursorKeys.left) {
+                this.direction = "left";
+            } else if (cursorKeys.right) {
+                this.direction = "right";
+            }
         }
+    }
 
+    // Sets player direction
+    setDirection(dir) {
+        this.direction = dir
     }
 
 }

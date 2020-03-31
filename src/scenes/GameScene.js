@@ -9,6 +9,8 @@ import PlayerSpawn from '../objects/PlayerSpawn'
 */
 class GameScene extends Phaser.Scene {
 
+    // TODO: fade-in/out scene transitions
+
     constructor(key, player) {
         super({
             key: key,
@@ -74,11 +76,12 @@ class GameScene extends Phaser.Scene {
         this.cameras.main.setLerp(0.3, 0.3);
 
         // Init keyboard inputs
-        this.cur_keys = this.input.keyboard.createCursorKeys();
         this.key_q = this.input.keyboard.addKey("q");
         this.key_x = this.input.keyboard.addKey("x");
         this.key_p = this.input.keyboard.addKey("p");
         this.key_s = this.input.keyboard.addKey("s");
+        this.key_k = this.input.keyboard.addKey("k");
+        this.cur_keys = this.input.keyboard.createCursorKeys();
 
         // Init physics
         this.physics.world.bounds.setTo(0, 0, map.widthInPixels, map.heightInPixels);
@@ -100,6 +103,13 @@ class GameScene extends Phaser.Scene {
     }
 
     update() {
+        
+        const cursorKeys = {
+            up: this.cur_keys.up.isDown,
+            down: this.cur_keys.down.isDown,
+            left: this.cur_keys.left.isDown,
+            right: this.cur_keys.right.isDown,
+        }
 
         // Keyboard input update
         if (Phaser.Input.Keyboard.JustDown(this.key_q)) {
@@ -108,6 +118,8 @@ class GameScene extends Phaser.Scene {
             console.log(this.player);
         } else if (Phaser.Input.Keyboard.JustDown(this.key_s)) {
             console.log(this);
+        } else if (Phaser.Input.Keyboard.JustDown(this.key_k)) {
+            console.log(cursorKeys);
         }
 
         // Update NPCs
@@ -123,12 +135,9 @@ class GameScene extends Phaser.Scene {
         });
 
         // Player update
-        this.player.update();
+        this.player.update(cursorKeys);
     }
 
-    getPlayerSpawns() {
-        return this.playerSpawns;
-    }
 }
 
 export default GameScene;
