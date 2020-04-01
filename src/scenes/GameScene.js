@@ -19,6 +19,7 @@ class GameScene extends Phaser.Scene {
         });
         this.name = key;
         this.player = player;
+        this.inTransition = true;
     }
 
     preload() {
@@ -88,7 +89,27 @@ class GameScene extends Phaser.Scene {
 
         this.createPlayer(0, 0);
 
-        console.log(this.name + " created");
+        // Register events
+        this.events.on("transitionout", () => {
+            this.inTransition = true;
+            console.log(this.name + ": transition out")
+            // this.cameras.main.fadeOut(300, 0, 0, 0);
+        });
+        this.events.on("transitionwake", () => console.log(this.name + ": transition wake"));
+        this.events.on("transitionstart", () => {
+            console.log(this.name + ": transition started");
+            this.inTransition = true;
+            // this.cameras.main.fadeIn(1500, 0, 0, 0);
+            // this.cameras.main.setAlpha(0.5);
+        });
+        this.events.on('transitioncomplete', () => {
+            console.log(this.name + ": transition complete");
+            this.inTransition = false;
+            this.player.inTransition = false;
+            this.player.justSpawned = true;
+            this.player.scene = this;
+            // this.cameras.main.setAlpha(1);
+        });
     }
 
     createPlayer(x, y) {
@@ -103,23 +124,24 @@ class GameScene extends Phaser.Scene {
     }
 
     update() {
-        
-        const cursorKeys = {
-            up: this.cur_keys.up.isDown,
-            down: this.cur_keys.down.isDown,
-            left: this.cur_keys.left.isDown,
-            right: this.cur_keys.right.isDown,
+         
+        if (this.inTransition) {
+            return;
         }
-
+        
         // Keyboard input update
         if (Phaser.Input.Keyboard.JustDown(this.key_q)) {
-            this.scene.switch("MainMenuScene");
+            this.scene.transition({
+                target: "MainMenuScene",
+                duration: 1000, 
+                sleep: true
+            });
         } else if (Phaser.Input.Keyboard.JustDown(this.key_p)) {
             console.log(this.player);
         } else if (Phaser.Input.Keyboard.JustDown(this.key_s)) {
             console.log(this);
         } else if (Phaser.Input.Keyboard.JustDown(this.key_k)) {
-            console.log(cursorKeys);
+            this.input.emit("k"); 
         }
 
         // Update NPCs
@@ -135,7 +157,22 @@ class GameScene extends Phaser.Scene {
         });
 
         // Player update
-        this.player.update(cursorKeys);
+        this.player.update();
+    }
+
+    transitionStartHandler() {
+        console.log("transition start");
+        this.inTransition = false;
+    }
+
+    readyHandler() {
+        console.log("ready!");
+        // this.cameras.main.fadeIn(300, 0, 0, 0);
+    }
+
+    transitionCam(progress) {
+        console.log(progress);
+        this.cameras.main.setAlpha(progress);
     }
 
 }

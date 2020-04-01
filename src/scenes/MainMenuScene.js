@@ -26,6 +26,7 @@ export class MainMenuScene extends Phaser.Scene {
         this.selected = 0;
         this.cur_keys = this.input.keyboard.createCursorKeys();
         this.enter = this.input.keyboard.addKey("ENTER");
+        this.disableInput = false;
 
         this.player = new Player(this, 0, 0);
 
@@ -33,9 +34,31 @@ export class MainMenuScene extends Phaser.Scene {
             let room1 = new GameScene("room1", this.player);
             this.scene.add("room1", room1);
         }
+        this.inTransition = false;
+        
+        this.events.on("transitionout", () => {
+            this.inTransition = true;
+            console.log("MainMenuScene: transition out")
+            // this.cameras.main.fadeOut(300, 0, 0, 0);
+        });
+        this.events.on("transitionwake", () => console.log("MainMenuScene: transition wake"));
+        this.events.on("transitionstart", () => {
+            console.log("MainMenuScene: transition started")
+            this.inTransition = true
+            // this.cameras.main.fadeIn(1500, 0, 0, 0);
+        });
+        this.events.on('transitioncomplete', () => {
+            console.log("MainMenuScene: transition complete");
+            this.inTransition = false;
+        });
     }
 
     update() {
+
+        if (this.inTransition) {
+            return;
+        }
+
         if (Phaser.Input.Keyboard.JustDown(this.cur_keys.up) || 
             Phaser.Input.Keyboard.JustDown(this.cur_keys.left)) {
                 this.selected = Math.abs(this.selected - 1) % this.options.length;
@@ -46,14 +69,27 @@ export class MainMenuScene extends Phaser.Scene {
             }
         else if (Phaser.Input.Keyboard.JustDown(this.enter)) {
             if (this.scene.isSleeping("room1")) {
-                this.scene.switch("room1");
+                this.scene.transition({
+                    target: "room1", 
+                    duration: 1000, 
+                    onUpdate: this.transitionCam,
+                });
             } else {
                 this.player.scene = this.scene.get("room1");
                 this.player.prevScene = this;
-                this.scene.start("room1");
+                this.scene.transition({
+                    target: "room1", 
+                    duration: 1000,
+                    onUpdate: this.transitionCam
+                })
             }
         }
         this.options_obj.forEach(obj => obj.setAlpha(0.5));
         this.options_obj[this.selected].setAlpha(1);
+    }
+
+    transitionCam(progress) {
+        console.log(progress);
+        this.cameras.main.setAlpha(progress);
     }
 }
