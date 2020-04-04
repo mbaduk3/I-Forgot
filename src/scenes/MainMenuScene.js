@@ -1,15 +1,10 @@
-import SimpleScene from './SimpleScene'
-import { Utils } from 'phaser';
+import { scenes } from '../constants/GameConstants'
 import GameScene from './GameScene';
 import Player from '../characters/Player'
 
 export class MainMenuScene extends Phaser.Scene {
 
-    constructor() {super("MainMenuScene")}
-
-    preload() {
-        Player.preload(this);
-    }
+    constructor() {super(scenes.MAIN_MENU)}
 
     create() {
         this.title = "I Forgot...";

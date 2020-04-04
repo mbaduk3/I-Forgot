@@ -22,15 +22,6 @@ class GameScene extends Phaser.Scene {
         this.inTransition = true;
     }
 
-    preload() {
-        NPC.preload(this, "Bear");
-        NPC.preload(this, "Mouse");
-        this.load.image(this.name + "_tiles", "assets/Sprites/" + this.name + "_tiles.png");
-        this.load.spritesheet('interact_x', 'assets/Sprites/Interact.png', {frameWidth: 16, frameHeight: 16});
-        this.load.tilemapTiledJSON(this.name + "_map", 'assets/Maps/' + this.name + "_map.json");
-        console.log(this.name + " preloaded");
-    }
-
     create() {
         // Init universal anims
         this.anims.create({
