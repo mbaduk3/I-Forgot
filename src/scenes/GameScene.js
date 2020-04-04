@@ -4,6 +4,7 @@ import Portal from '../objects/Portal'
 import PlayerSpawn from '../objects/PlayerSpawn'
 
 /* 
+    The main gameplay scene. 
     Each instance of GameScene represents a separate "room" in the game.
     Differentiate rooms based on the "key" passed into constructor. 
 */
@@ -23,14 +24,6 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
-        // Init universal anims
-        this.anims.create({
-            key: 'interact', 
-            frames: this.anims.generateFrameNames('interact_x', {start: 0, end: 1}),
-            frameRate: 3,
-            repeat: -1,
-        });
-
         // Map Base layer
         let map = this.make.tilemap({key: this.name + "_map"});
         let tileset = map.addTilesetImage(this.name + "_tiles");

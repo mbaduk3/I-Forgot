@@ -13,7 +13,7 @@ export class MainMenuScene extends Phaser.Scene {
         this.options_obj = [];
         this.options = [{
             text: "New Game",
-            onClick: "room1"}, 
+            onClick: scenes.ROOM1}, 
             {text: "Help", 
             onClick: null}]
         this.options.forEach((opt, i) => {
@@ -25,9 +25,9 @@ export class MainMenuScene extends Phaser.Scene {
 
         this.player = new Player(this, 0, 0);
 
-        if (this.scene.get("room1") == null) {
-            let room1 = new GameScene("room1", this.player);
-            this.scene.add("room1", room1);
+        if (this.scene.get(scenes.ROOM1) == null) {
+            let room1 = new GameScene(scenes.ROOM1, this.player);
+            this.scene.add(scenes.ROOM1, room1);
         }
         this.inTransition = false;
         
@@ -63,17 +63,17 @@ export class MainMenuScene extends Phaser.Scene {
                 this.selected = Math.abs(this.selected + 1) % this.options.length;
             }
         else if (Phaser.Input.Keyboard.JustDown(this.enter)) {
-            if (this.scene.isSleeping("room1")) {
+            if (this.scene.isSleeping(scenes.ROOM1)) {
                 this.scene.transition({
-                    target: "room1", 
+                    target: scenes.ROOM1, 
                     duration: 1000, 
                     onUpdate: this.transitionCam,
                 });
             } else {
-                this.player.scene = this.scene.get("room1");
+                this.player.scene = this.scene.get(scenes.ROOM1);
                 this.player.prevScene = this;
                 this.scene.transition({
-                    target: "room1", 
+                    target: scenes.ROOM1, 
                     duration: 1000,
                     onUpdate: this.transitionCam
                 })

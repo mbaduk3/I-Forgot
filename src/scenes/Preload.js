@@ -1,5 +1,6 @@
 import { assets, scenes } from '../constants/GameConstants'
 import NPC from '../characters/NPC';
+import Player from '../characters/Player';
 
 /* 
     Auxilliary scene which preloads most game assets. 
@@ -28,6 +29,15 @@ export class Preload extends Phaser.Scene {
     }
 
     create() {
+        // Create global animations
+        this.anims.create({
+            key: 'interact', 
+            frames: this.anims.generateFrameNames('interact_x', {start: 0, end: 1}),
+            frameRate: 3,
+            repeat: -1,
+        });
+        Player.createAnims(this);
+
         // Launch main menu
         this.scene.launch(scenes.MAIN_MENU);
 

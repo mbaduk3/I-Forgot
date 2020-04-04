@@ -1,3 +1,5 @@
+import { assets, constAnims } from '../constants/GameConstants'
+
 class Player {
 
     /* 
@@ -17,10 +19,6 @@ class Player {
         this.inTransition = false;
     }
 
-    static preload(scene) {
-        scene.load.spritesheet('hedgehog_sheet', 'assets/Sprites/Hedgehog.png', {frameWidth: 16, frameHeight: 16});
-    }
-
     create() {
 
         // Physics
@@ -30,44 +28,7 @@ class Player {
         this.sprite.body.setOffset(3, 8);
         this.sprite.setCollideWorldBounds(true);
 
-        // Animations 
-        this.scene.anims.create({
-            key: 'hedgehog_walk_down',
-            frames: this.scene.anims.generateFrameNames('hedgehog_sheet', {start:0, end:3}),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.scene.anims.create({
-            key: 'hedgehog_idle_down',
-            frames: this.scene.anims.generateFrameNames('hedgehog_sheet', {start: 1, end: 1}),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.scene.anims.create({
-            key: 'hedgehog_walk_left',
-            frames: this.scene.anims.generateFrameNames('hedgehog_sheet', {start:4, end:7}),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.scene.anims.create({
-            key: 'hedgehog_idle_left',
-            frames: this.scene.anims.generateFrameNames('hedgehog_sheet', {start: 5, end: 5}),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.scene.anims.create({
-            key: 'hedgehog_walk_up',
-            frames: this.scene.anims.generateFrameNames('hedgehog_sheet', {start:8, end:11}),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.scene.anims.create({
-            key: 'hedgehog_idle_up',
-            frames: this.scene.anims.generateFrameNames('hedgehog_sheet', {start: 9, end: 9}),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.sprite.play('hedgehog_idle_down');
+        this.sprite.play(constAnims.PLAYER.IDLE_DOWN);
 
 
         // Interact rect
@@ -161,37 +122,37 @@ class Player {
             this.sprite.setVelocity(0, 0);
             switch (this.direction) {
                 case "up":
-                    this.sprite.play('hedgehog_idle_up', true);
+                    this.sprite.play(constAnims.PLAYER.IDLE_UP, true);
                     break;
                 case "down":
-                    this.sprite.play('hedgehog_idle_down', true);
+                    this.sprite.play(constAnims.PLAYER.IDLE_DOWN, true);
                     break;
                 case "left":
-                    this.sprite.play('hedgehog_idle_left', true);
+                    this.sprite.play(constAnims.PLAYER.IDLE_LEFT, true);
                     this.sprite.setFlipX(false);
                     break;
                 case "right":
-                    this.sprite.play('hedgehog_idle_left', true);
+                    this.sprite.play(constAnims.PLAYER.IDLE_LEFT, true);
                     this.sprite.setFlipX(true);
                     break;
             }
         } else if (this.state == "walk") {
             switch (this.direction) {
                 case "up":
-                    this.sprite.play('hedgehog_walk_up', true);
+                    this.sprite.play(constAnims.PLAYER.WALK_UP, true);
                     this.sprite.setVelocity(0, -this.speed);
                     break;
                 case "down":
-                    this.sprite.play('hedgehog_walk_down', true);
+                    this.sprite.play(constAnims.PLAYER.WALK_DOWN, true);
                     this.sprite.setVelocity(0, this.speed);
                     break;
                 case "left":
-                    this.sprite.play('hedgehog_walk_left', true);
+                    this.sprite.play(constAnims.PLAYER.WALK_LEFT, true);
                     this.sprite.setVelocity(-this.speed, 0);
                     this.sprite.setFlipX(false);
                     break;
                 case "right":
-                    this.sprite.play('hedgehog_walk_left', true);
+                    this.sprite.play(constAnims.PLAYER.WALK_LEFT, true);
                     this.sprite.setVelocity(this.speed, 0);
                     this.sprite.setFlipX(true);
                     break;
@@ -215,6 +176,46 @@ class Player {
                 this.direction = "right";
             }
         }
+    }
+
+
+    static createAnims(scene) {
+        scene.anims.create({
+            key: constAnims.PLAYER.WALK_DOWN,
+            frames: scene.anims.generateFrameNames(assets.PLAYER_SPRITESHEET, {start:0, end:3}),
+            frameRate: 8,
+            repeat: -1
+        });
+        scene.anims.create({
+            key: constAnims.PLAYER.IDLE_DOWN,
+            frames: scene.anims.generateFrameNames(assets.PLAYER_SPRITESHEET, {start: 1, end: 1}),
+            frameRate: 8,
+            repeat: -1
+        });
+        scene.anims.create({
+            key: constAnims.PLAYER.WALK_LEFT,
+            frames: scene.anims.generateFrameNames(assets.PLAYER_SPRITESHEET, {start:4, end:7}),
+            frameRate: 8,
+            repeat: -1
+        });
+        scene.anims.create({
+            key: constAnims.PLAYER.IDLE_LEFT,
+            frames: scene.anims.generateFrameNames(assets.PLAYER_SPRITESHEET, {start: 5, end: 5}),
+            frameRate: 8,
+            repeat: -1
+        });
+        scene.anims.create({
+            key: constAnims.PLAYER.WALK_UP,
+            frames: scene.anims.generateFrameNames(assets.PLAYER_SPRITESHEET, {start:8, end:11}),
+            frameRate: 8,
+            repeat: -1
+        });
+        scene.anims.create({
+            key: constAnims.PLAYER.IDLE_UP,
+            frames: scene.anims.generateFrameNames(assets.PLAYER_SPRITESHEET, {start: 9, end: 9}),
+            frameRate: 8,
+            repeat: -1
+        });
     }
 
 }
