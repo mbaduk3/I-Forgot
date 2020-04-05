@@ -19,6 +19,7 @@ class Player {
         this.inTransition = false;
     }
 
+    // Adds the player to the scene's current room. 
     create() {
 
         // Physics
@@ -47,54 +48,54 @@ class Player {
             return;
         }
 
-        /* Does the player position need to be reset, so as to not trigger 
-           the portal again? (just spawned)? */
-        if (this.justSpawned) {
-            this.sprite = this.scene.playerSprite; // Each scene has its own player sprite.
-            this.interactRect = this.scene.interactRect; // Each scene has its own interactRect.
-            this.cur_keys = this.scene.cur_keys;
-            if (this.targetSpawn != null) {
-                let spawn = this.scene.playerSpawns[this.targetSpawn]
-                this.x = spawn.x;
-                this.sprite.x = spawn.x;
-                this.y = spawn.y;
-                this.sprite.y = spawn.y;
-            }
-            this.justSpawned = false;
-        } else {
-            // Check portals collisions 
-            this.scene.portalsArr.forEach((portal) => {
-                if (Phaser.Geom.Rectangle.Overlaps(this.sprite.getBounds(), portal)) {
-                    let old_scene = this.scene;
-                    this.prevScene = old_scene;
-                    this.scene = this.scene.scene.get(portal.to_room);
-                    this.targetSpawn = portal.to_spawn;
-                    // Before we put to sleep, reset cursor keys.
-                    old_scene.cur_keys.up.reset();
-                    old_scene.cur_keys.down.reset();
-                    old_scene.cur_keys.left.reset();
-                    old_scene.cur_keys.right.reset();
-                    this.sprite.setVelocity(0, 0);
-                    this.state = "idle";
-                    this.inTransition = true;
-                    // Transition scenes, fade in between.
-                    // old_scene.scene.get(portal.to_room).inTransition = true;
-                    // old_scene.inTransition = true;
-                    old_scene.scene.transition({
-                        target: portal.to_room,
-                        duration: 1000, 
-                        sleep: true,
-                        onUpdate: (prog) => {
-                            if (this.state.cameras) {
-                                console.log(prog);
-                                this.state.cameras.setAlpha(prog)
-                            }
-                        }
-                    });
-                    // old_scene.cameras.main.fade(400, 0, 0, 0);
-                }
-            });
-        }
+        // /* Does the player position need to be reset, so as to not trigger 
+        //    the portal again? (just spawned)? */
+        // if (this.justSpawned) {
+        //     this.sprite = this.scene.playerSprite; // Each scene has its own player sprite.
+        //     this.interactRect = this.scene.interactRect; // Each scene has its own interactRect.
+        //     this.cur_keys = this.scene.cur_keys;
+        //     if (this.targetSpawn != null) {
+        //         let spawn = this.scene.playerSpawns[this.targetSpawn]
+        //         this.x = spawn.x;
+        //         this.sprite.x = spawn.x;
+        //         this.y = spawn.y;
+        //         this.sprite.y = spawn.y;
+        //     }
+        //     this.justSpawned = false;
+        // } else {
+        //     // Check portals collisions 
+        //     this.scene.portalsArr.forEach((portal) => {
+        //         if (Phaser.Geom.Rectangle.Overlaps(this.sprite.getBounds(), portal)) {
+        //             let old_scene = this.scene;
+        //             this.prevScene = old_scene;
+        //             this.scene = this.scene.scene.get(portal.to_room);
+        //             this.targetSpawn = portal.to_spawn;
+        //             // Before we put to sleep, reset cursor keys.
+        //             old_scene.cur_keys.up.reset();
+        //             old_scene.cur_keys.down.reset();
+        //             old_scene.cur_keys.left.reset();
+        //             old_scene.cur_keys.right.reset();
+        //             this.sprite.setVelocity(0, 0);
+        //             this.state = "idle";
+        //             this.inTransition = true;
+        //             // Transition scenes, fade in between.
+        //             // old_scene.scene.get(portal.to_room).inTransition = true;
+        //             // old_scene.inTransition = true;
+        //             old_scene.scene.transition({
+        //                 target: portal.to_room,
+        //                 duration: 1000, 
+        //                 sleep: true,
+        //                 onUpdate: (prog) => {
+        //                     if (this.state.cameras) {
+        //                         console.log(prog);
+        //                         this.state.cameras.setAlpha(prog)
+        //                     }
+        //                 }
+        //             });
+        //             // old_scene.cameras.main.fade(400, 0, 0, 0);
+        //         }
+        //     });
+        // }
         
         // Update depth
         this.sprite.depth = this.sprite.y;
