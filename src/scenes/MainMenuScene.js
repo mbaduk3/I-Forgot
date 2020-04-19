@@ -9,7 +9,6 @@ export class MainMenuScene extends Phaser.Scene {
     create() {
         this.title = "I Forgot...";
         this.add.text(10, 10, this.title);
-
         this.name = "MainMenuScene";
         this.options_obj = [];
         this.options = [{
@@ -24,8 +23,6 @@ export class MainMenuScene extends Phaser.Scene {
         this.enter = this.input.keyboard.addKey("ENTER");
         this.disableInput = false;
 
-        // this.player = new Player(this, 0, 0);
-
         if (this.scene.get(scenes.ROOM1) == null) {
             let room1 = new GameScene(scenes.ROOM1);
             this.scene.add(scenes.ROOM1, room1);
@@ -33,17 +30,17 @@ export class MainMenuScene extends Phaser.Scene {
         this.inTransition = false;
         
         this.events.on('transitionout', () => {
-            console.log(this.name + ": transition out");
+            // console.log(this.name + ": transition out");
             this.inTransition = true;
             this.cameras.main.fadeOut(0);
         })
         this.events.on('transitionstart', () => {
-            console.log(this.name + ": transition started");
+            // console.log(this.name + ": transition started");
             this.inTransition = true;
             this.cameras.main.fadeOut(0);
         });
         this.events.on('transitioncomplete', () => {
-            console.log(this.name + ": transition complete");
+            // console.log(this.name + ": transition complete");
             this.inTransition = false;
             this.cameras.main.fadeIn(500, 0, 0, 0, (cam, p) => {
                 if (p > 0.99) {

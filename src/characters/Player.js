@@ -1,10 +1,10 @@
 import { assets, constAnims } from '../constants/GameConstants'
 
+/*
+    The player object is tranferable across rooms, but for each room it maintains
+    a new copy of its arcade sprite and interact rect (ie. physics objects). 
+*/
 class Player {
-
-    /* 
-    TODO: Make the player object transferable between scenes.
-    */
 
     constructor(scene, x, y) {
         this.scene = scene;
@@ -40,7 +40,13 @@ class Player {
         this.scene.interactRect = this.interactRect;
 
         // Keyboard input
-        this.cur_keys = this.scene.cur_keys;
+        this.cur_keys = {
+            up: this.scene.keys.key_up,
+            down: this.scene.keys.key_down,
+            left: this.scene.keys.key_left,
+            right: this.scene.keys.key_right,
+        };
+
     }
 
     update(time, delta) {
