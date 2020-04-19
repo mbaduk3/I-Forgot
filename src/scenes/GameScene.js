@@ -2,7 +2,7 @@ import Player from "../characters/Player";
 import NPC from "../characters/NPC";
 import Portal from '../objects/Portal'
 import PlayerSpawn from '../objects/PlayerSpawn'
-import { scenes } from '../constants/GameConstants'
+import { scenes, constAnims } from '../constants/GameConstants'
 import Room from "../aux/Room";
 
 /* 
@@ -18,16 +18,16 @@ import Room from "../aux/Room";
 */
 class GameScene extends Phaser.Scene {
 
-    // TODO: fade-in/out scene transitions
+    // TODO: figure out why physics debug broken
+    // TODO: why does adding through scene.physics.add work, but scene.add doesn't?
 
-    constructor(key, player) {
+    constructor(key) {
         super({
             key: key,
             plugins: ['Loader', 'InputPlugin', 'Clock', 'TweenManager', 
                       'DataManager']
         });
         this.name = key;
-        this.player = player;
         this.rooms = {}
         this.curRoomKey = null;
     }
@@ -87,9 +87,14 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
+        this.initPlayer();
+        
         // Init camera
         this.cameras.main.setZoom(3.5);
         this.cameras.main.setLerp(0.3, 0.3);
+        this.cameras.main.red = 0;
+        this.cameras.main.blue = 0;
+        this.cameras.main.green = 10;
 
         // Init keyboard inputs
         this.key_q = this.input.keyboard.addKey("q");
@@ -128,46 +133,47 @@ class GameScene extends Phaser.Scene {
         this.createRoom(scenes.ROOM2);
         this.createMap(scenes.ROOM2);
         this.populateMap(scenes.ROOM2);
-        this.switchRoom(scenes.ROOM1);
+        this.generatePhysics(scenes.ROOM2);
 
-        // // Register events
-        // this.events.on("transitionout", () => {
-        //     this.inTransition = true;
-        //     console.log(this.name + ": transition out")
-        //     // this.cameras.main.fadeOut(300, 0, 0, 0);
-        // });
-        // this.events.on("transitionwake", () => console.log(this.name + ": transition wake"));
-        // this.events.on("transitionstart", () => {
-        //     console.log(this.name + ": transition started");
-        //     this.inTransition = true;
-        //     // this.cameras.main.fadeIn(1500, 0, 0, 0);
-        //     // this.cameras.main.setAlpha(0.5);
-        // });
-        // this.events.on('transitioncomplete', () => {
-        //     console.log(this.name + ": transition complete");
-        //     this.inTransition = false;
-        //     this.player.inTransition = false;
-        //     this.player.justSpawned = true;
-        //     this.player.scene = this;
-        //     // this.cameras.main.setAlpha(1);
-        // });
+
+        this.events.on('transitionout', () => {
+            // console.log(this.name + ": transition out");
+            this.cameras.main.fadeOut(0);
+        })
+        this.events.on('transitionstart', () => {
+            // console.log(this.name + ": transition started");
+            this.cameras.main.fadeOut(0);
+        });
+        this.events.on('transitioncomplete', () => {
+            // console.log(this.name + ": transition complete");
+            this.key_q.reset();
+            this.cameras.main.fadeIn(500, 0, 0, 0, (cam, p) => {
+                if (p > 0.99) {
+                    this.cameras.main.alpha = 1;
+                }
+            });
+        });
+        console.log(this.anims.get(constAnims.PLAYER.WALK_DOWN));
     }
 
+    // Should only be called once 
+    initPlayer() {
+        this.player = new Player(this, 0, 0);
+    }
+
+    // Called once in the initialization of each room.
     createPlayer(x, y) {
         // Create player
+        this.player.scene = this;
         this.player.create();
         this.rooms[this.curRoomKey].player.sprite = this.player.sprite;
         this.rooms[this.curRoomKey].player.interactRect = this.player.interactRect;
-
-        // // Player physics
-        // this.physics.add.collider(this.player.sprite, this.npcGroup);
 
         // Player camera
         this.cameras.main.startFollow(this.player.sprite);
     }
 
-    update() {
-         
+    update(time, delta) {         
         if (this.inTransition) {
             return;
         }
@@ -176,7 +182,7 @@ class GameScene extends Phaser.Scene {
         if (Phaser.Input.Keyboard.JustDown(this.key_q)) {
             this.scene.transition({
                 target: "MainMenuScene",
-                duration: 1000, 
+                duration: 100, 
                 sleep: true
             });
         } else if (Phaser.Input.Keyboard.JustDown(this.key_p)) {
@@ -184,32 +190,44 @@ class GameScene extends Phaser.Scene {
         } else if (Phaser.Input.Keyboard.JustDown(this.key_s)) {
             console.log(this);
         } else if (Phaser.Input.Keyboard.JustDown(this.key_k)) {
-            this.switchRoom(scenes.ROOM2);
+            this.transitionRoom(scenes.ROOM2);
         } else if (Phaser.Input.Keyboard.JustDown(this.key_j)) {
-            this.switchRoom(scenes.ROOM1);
+            this.transitionRoom(scenes.ROOM1);
         } 
 
-        // // Update NPCs
-        // this.npcGroup.getChildren().forEach((npcSprite) => {
-        //     // Overlap
-        //     if (this.physics.overlap(this.player.interactRect, npcSprite)) {
-        //         npcSprite.parent.canInteract = true;
-        //     } else {
-        //         npcSprite.parent.canInteract = false;
-        //     }
-        //     // Update
-        //     npcSprite.parent.update();
-        // });
+        // Update NPCs
+        this.npcGroup.getChildren().forEach((npcSprite) => {
+            // Overlap
+            if (this.physics.overlap(this.player.interactRect, npcSprite)) {
+                npcSprite.parent.canInteract = true;
+            } else {
+                npcSprite.parent.canInteract = false;
+            }
+            // Update
+            npcSprite.parent.update(time, delta);
+        });
 
         // Player update
-        this.player.update();
+        this.player.update(time, delta);
     }
 
     
+    /*
+        Transitions to the room specified by [key] with a camera fade.
+    */
+    transitionRoom(key) {
+        this.cameras.main.fadeOut(200, 0, 0, 0, (cam, p) => {
+            if (p > 0.99) {
+                this.switchRoom(key);
+                this.cameras.main.fadeIn(200, 10, 10, 10);
+            }}
+        );
+    }
 
     /*
         Switches the scene to the room specifed by given key.
         Note: createRoom(key) must have been called first before switching.
+        Note: to transition rooms in-game, use transitionRoom().
     */
     switchRoom(key) {
         let room = this.rooms[key];
@@ -222,10 +240,13 @@ class GameScene extends Phaser.Scene {
         if (map != null) {
             this.physics.world.bounds.setTo(0, 0, map.widthInPixels, map.heightInPixels);
         }
-        this.player.sprite = room.player.sprite;
-        this.player.interactRect = room.player.interactRect;
-        if (this.player.sprite != null) {
-            this.cameras.main.startFollow(this.player.sprite);
+        if (this.player != null) {
+            this.player.sprite = room.player.sprite;
+            this.player.interactRect = room.player.interactRect;
+            if (this.player.sprite != null) {
+                this.cameras.main.startFollow(this.player.sprite);
+                this.cameras.main.setLerp(0.3, 0.3);
+            }
         }
         this.npcGroup = room.npcGroup;
         this.curRoomKey = key;

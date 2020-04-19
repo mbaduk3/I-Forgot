@@ -10,6 +10,7 @@ export class MainMenuScene extends Phaser.Scene {
         this.title = "I Forgot...";
         this.add.text(10, 10, this.title);
 
+        this.name = "MainMenuScene";
         this.options_obj = [];
         this.options = [{
             text: "New Game",
@@ -23,37 +24,39 @@ export class MainMenuScene extends Phaser.Scene {
         this.enter = this.input.keyboard.addKey("ENTER");
         this.disableInput = false;
 
-        this.player = new Player(this, 0, 0);
+        // this.player = new Player(this, 0, 0);
 
         if (this.scene.get(scenes.ROOM1) == null) {
-            let room1 = new GameScene(scenes.ROOM1, this.player);
+            let room1 = new GameScene(scenes.ROOM1);
             this.scene.add(scenes.ROOM1, room1);
         }
         this.inTransition = false;
         
-        this.events.on("transitionout", () => {
+        this.events.on('transitionout', () => {
+            console.log(this.name + ": transition out");
             this.inTransition = true;
-            console.log("MainMenuScene: transition out")
-            // this.cameras.main.fadeOut(300, 0, 0, 0);
-        });
-        this.events.on("transitionwake", () => console.log("MainMenuScene: transition wake"));
-        this.events.on("transitionstart", () => {
-            console.log("MainMenuScene: transition started")
-            this.inTransition = true
-            // this.cameras.main.fadeIn(1500, 0, 0, 0);
+            this.cameras.main.fadeOut(0);
+        })
+        this.events.on('transitionstart', () => {
+            console.log(this.name + ": transition started");
+            this.inTransition = true;
+            this.cameras.main.fadeOut(0);
         });
         this.events.on('transitioncomplete', () => {
-            console.log("MainMenuScene: transition complete");
+            console.log(this.name + ": transition complete");
             this.inTransition = false;
+            this.cameras.main.fadeIn(500, 0, 0, 0, (cam, p) => {
+                if (p > 0.99) {
+                    this.cameras.main.alpha = 1;
+                }
+            });
         });
     }
 
     update() {
-
         if (this.inTransition) {
             return;
         }
-
         if (Phaser.Input.Keyboard.JustDown(this.cur_keys.up) || 
             Phaser.Input.Keyboard.JustDown(this.cur_keys.left)) {
                 this.selected = Math.abs(this.selected - 1) % this.options.length;
@@ -63,28 +66,13 @@ export class MainMenuScene extends Phaser.Scene {
                 this.selected = Math.abs(this.selected + 1) % this.options.length;
             }
         else if (Phaser.Input.Keyboard.JustDown(this.enter)) {
-            if (this.scene.isSleeping(scenes.ROOM1)) {
-                this.scene.transition({
-                    target: scenes.ROOM1, 
-                    duration: 1000, 
-                    onUpdate: this.transitionCam,
-                });
-            } else {
-                this.player.scene = this.scene.get(scenes.ROOM1);
-                this.player.prevScene = this;
-                this.scene.transition({
-                    target: scenes.ROOM1, 
-                    duration: 1000,
-                    onUpdate: this.transitionCam
-                })
-            }
+            this.scene.transition({
+                target: scenes.ROOM1, 
+                duration: 100, 
+            });
         }
         this.options_obj.forEach(obj => obj.setAlpha(0.5));
         this.options_obj[this.selected].setAlpha(1);
     }
 
-    transitionCam(progress) {
-        console.log(progress);
-        this.cameras.main.setAlpha(progress);
-    }
 }

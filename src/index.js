@@ -5,8 +5,10 @@ import { SimpleScene } from './scenes/SimpleScene';
 import GameScene from './scenes/GameScene';
 
 const gameConfig = {
-    width: 680,
-    height: 400,
+    // width: 680,
+    // height: 400,
+    width: 800,
+    height: 500,
     pixelArt: true,
     scene: [Preload, MainMenuScene],
     physics: {
@@ -15,7 +17,7 @@ const gameConfig = {
             gravity: {
                 y: 0
             },
-            debug: false
+            debug: true
         }
     }
 };

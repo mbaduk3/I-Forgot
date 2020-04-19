@@ -23,13 +23,14 @@ class Player {
     create() {
 
         // Physics
-        this.sprite = this.scene.physics.add.sprite(this.x, this.y, 'hedgehog_sheet');
+        this.sprite = this.scene.physics.add.sprite(this.x, this.y, assets.PLAYER_SPRITESHEET);
+        this.sprite.body.debugShowBody = true;
         this.scene.playerSprite = this.sprite;
         this.sprite.body.setSize(10, 8);
         this.sprite.body.setOffset(3, 8);
         this.sprite.setCollideWorldBounds(true);
 
-        this.sprite.play(constAnims.PLAYER.IDLE_DOWN);
+        this.sprite.play(constAnims.PLAYER.WALK_DOWN, true);
 
 
         // Interact rect
@@ -42,8 +43,8 @@ class Player {
         this.cur_keys = this.scene.cur_keys;
     }
 
-    update() {
-
+    update(time, delta) {
+        this.sprite.preUpdate(time, delta); // Required for anims to work
         if (this.inTransition) {
             return;
         }
@@ -99,6 +100,7 @@ class Player {
         
         // Update depth
         this.sprite.depth = this.sprite.y;
+        this.sprite.update(time, delta);
 
         // Update interact rect
         switch (this.direction) {
@@ -183,37 +185,37 @@ class Player {
     static createAnims(scene) {
         scene.anims.create({
             key: constAnims.PLAYER.WALK_DOWN,
-            frames: scene.anims.generateFrameNames(assets.PLAYER_SPRITESHEET, {start:0, end:3}),
+            frames: scene.anims.generateFrameNumbers(assets.PLAYER_SPRITESHEET, {start:0, end:3}),
             frameRate: 8,
             repeat: -1
         });
         scene.anims.create({
             key: constAnims.PLAYER.IDLE_DOWN,
-            frames: scene.anims.generateFrameNames(assets.PLAYER_SPRITESHEET, {start: 1, end: 1}),
+            frames: scene.anims.generateFrameNumbers(assets.PLAYER_SPRITESHEET, {start: 1, end: 1}),
             frameRate: 8,
             repeat: -1
         });
         scene.anims.create({
             key: constAnims.PLAYER.WALK_LEFT,
-            frames: scene.anims.generateFrameNames(assets.PLAYER_SPRITESHEET, {start:4, end:7}),
+            frames: scene.anims.generateFrameNumbers(assets.PLAYER_SPRITESHEET, {start:4, end:7}),
             frameRate: 8,
             repeat: -1
         });
         scene.anims.create({
             key: constAnims.PLAYER.IDLE_LEFT,
-            frames: scene.anims.generateFrameNames(assets.PLAYER_SPRITESHEET, {start: 5, end: 5}),
+            frames: scene.anims.generateFrameNumbers(assets.PLAYER_SPRITESHEET, {start: 5, end: 5}),
             frameRate: 8,
             repeat: -1
         });
         scene.anims.create({
             key: constAnims.PLAYER.WALK_UP,
-            frames: scene.anims.generateFrameNames(assets.PLAYER_SPRITESHEET, {start:8, end:11}),
+            frames: scene.anims.generateFrameNumbers(assets.PLAYER_SPRITESHEET, {start:8, end:11}),
             frameRate: 8,
             repeat: -1
         });
         scene.anims.create({
             key: constAnims.PLAYER.IDLE_UP,
-            frames: scene.anims.generateFrameNames(assets.PLAYER_SPRITESHEET, {start: 9, end: 9}),
+            frames: scene.anims.generateFrameNumbers(assets.PLAYER_SPRITESHEET, {start: 9, end: 9}),
             frameRate: 8,
             repeat: -1
         });
