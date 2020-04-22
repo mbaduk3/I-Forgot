@@ -28,3 +28,8 @@ export const constAnims = {
     },
     INTERACT_X: "interact",
 }
+
+export const events = {
+    ROOM_TRANSITION_START: "roomtransitionstart",
+    ROOM_TRANSITION_END: "roomtransitionend",
+}

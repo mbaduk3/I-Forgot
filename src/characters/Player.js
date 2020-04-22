@@ -1,4 +1,5 @@
-import { assets, constAnims } from '../constants/GameConstants'
+import { assets, constAnims, events} from '../constants/GameConstants'
+import EventDispatcher from '../aux/EventDispatcher'
 
 /*
     The player object is tranferable across rooms, but for each room it maintains
@@ -14,9 +15,9 @@ class Player {
         this.state = "idle";
         this.x = x;
         this.y = y;
-        this.justSpawned = true;
-        this.targetSpawn = null;
-        this.inTransition = false;
+        this.inactive = true;
+        this.to_spawn = null;
+        this.emitter = EventDispatcher.getInstance();
     }
 
     // Adds the player to the scene's current room. 
@@ -47,65 +48,20 @@ class Player {
             right: this.scene.keys.key_right,
         };
 
+        this.emitter.on(events.ROOM_TRANSITION_END, () => {
+            let room = this.scene.rooms[this.scene.curRoomKey];
+            this.jumpToPos(room.playerSpawns[this.to_spawn].x, room.playerSpawns[this.to_spawn].y);
+            this.setActive(true);
+        });
+
+        this.inactive = false;
     }
 
     update(time, delta) {
+        if (this.inactive) return; // If inactive, don't update. 
         this.sprite.preUpdate(time, delta); // Required for anims to work
-        if (this.inTransition) {
-            return;
-        }
-
-        // /* Does the player position need to be reset, so as to not trigger 
-        //    the portal again? (just spawned)? */
-        // if (this.justSpawned) {
-        //     this.sprite = this.scene.playerSprite; // Each scene has its own player sprite.
-        //     this.interactRect = this.scene.interactRect; // Each scene has its own interactRect.
-        //     this.cur_keys = this.scene.cur_keys;
-        //     if (this.targetSpawn != null) {
-        //         let spawn = this.scene.playerSpawns[this.targetSpawn]
-        //         this.x = spawn.x;
-        //         this.sprite.x = spawn.x;
-        //         this.y = spawn.y;
-        //         this.sprite.y = spawn.y;
-        //     }
-        //     this.justSpawned = false;
-        // } else {
-        //     // Check portals collisions 
-        //     this.scene.portalsArr.forEach((portal) => {
-        //         if (Phaser.Geom.Rectangle.Overlaps(this.sprite.getBounds(), portal)) {
-        //             let old_scene = this.scene;
-        //             this.prevScene = old_scene;
-        //             this.scene = this.scene.scene.get(portal.to_room);
-        //             this.targetSpawn = portal.to_spawn;
-        //             // Before we put to sleep, reset cursor keys.
-        //             old_scene.cur_keys.up.reset();
-        //             old_scene.cur_keys.down.reset();
-        //             old_scene.cur_keys.left.reset();
-        //             old_scene.cur_keys.right.reset();
-        //             this.sprite.setVelocity(0, 0);
-        //             this.state = "idle";
-        //             this.inTransition = true;
-        //             // Transition scenes, fade in between.
-        //             // old_scene.scene.get(portal.to_room).inTransition = true;
-        //             // old_scene.inTransition = true;
-        //             old_scene.scene.transition({
-        //                 target: portal.to_room,
-        //                 duration: 1000, 
-        //                 sleep: true,
-        //                 onUpdate: (prog) => {
-        //                     if (this.state.cameras) {
-        //                         console.log(prog);
-        //                         this.state.cameras.setAlpha(prog)
-        //                     }
-        //                 }
-        //             });
-        //             // old_scene.cameras.main.fade(400, 0, 0, 0);
-        //         }
-        //     });
-        // }
-        
-        // Update depth
-        this.sprite.depth = this.sprite.y;
+        this.checkPortalCollision(); // Update portal collisions
+        this.sprite.depth = this.sprite.y; // Update depth
         this.sprite.update(time, delta);
 
         // Update interact rect
@@ -187,7 +143,6 @@ class Player {
         }
     }
 
-
     static createAnims(scene) {
         scene.anims.create({
             key: constAnims.PLAYER.WALK_DOWN,
@@ -224,6 +179,46 @@ class Player {
             frames: scene.anims.generateFrameNumbers(assets.PLAYER_SPRITESHEET, {start: 9, end: 9}),
             frameRate: 8,
             repeat: -1
+        });
+    }
+
+    // Sets the player's activity. 
+    // Setting to false will stop the player from updating.
+    setActive(b) {
+        this.inactive = !b;
+        let room = this.scene.rooms[this.scene.curRoomKey];
+        room.player["sprite"].active = b;
+        room.player["interactRect"].active = b;
+    }
+
+    // Sets player's position to [x, y].
+    jumpToPos(x, y) {
+        this.x = x; this.y = y;
+        this.sprite.x = x; this.sprite.y = y;
+    }
+
+    // Checks the player against collisions with portals.
+    // Triggers a room change if detected. 
+    checkPortalCollision() {
+        /*
+            If the player steps in a portal:
+            1. Deactivate the player to prevent retriggering portal. 
+            2. Trigger transitionRoom(target_room). 
+            3. Emit the ROOM_TRANISITION event, passing the room to transition to. 
+            Note: (the following steps are handled by an event listener for the camera fade finish).
+            4. Jump the player to the specified spawn position. 
+            5. Reactivate the player. 
+        */
+       let room = this.scene.rooms[this.scene.curRoomKey];
+       room.portalsArr.forEach((portal) => {
+            if (Phaser.Geom.Rectangle.Overlaps(this.sprite.getBounds(), portal)) {
+                // this.targetSpawn = portal.to_spawn;
+                this.setActive(false);
+                this.scene.transitionRoom(portal.to_room);
+                this.to_spawn = portal.to_spawn;
+                this.emitter.emit(events.ROOM_TRANSITION_START, portal.to_room);
+                return;
+            }
         });
     }
 

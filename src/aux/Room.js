@@ -18,6 +18,8 @@ class Room {
             interactRect: null,
         }
         this.npcGroup = null;
+        this.portalsArr = null;
+        this.playerSpawns = null;
     }
 
 }

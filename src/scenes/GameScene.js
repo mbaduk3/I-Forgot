@@ -2,8 +2,9 @@ import Player from "../characters/Player";
 import NPC from "../characters/NPC";
 import Portal from '../objects/Portal'
 import PlayerSpawn from '../objects/PlayerSpawn'
-import { scenes, constAnims } from '../constants/GameConstants'
+import { scenes, constAnims, events } from '../constants/GameConstants'
 import Room from "../aux/Room";
+import EventDispatcher from '../aux/EventDispatcher'
 
 /* 
     The main gameplay scene. 
@@ -30,6 +31,7 @@ class GameScene extends Phaser.Scene {
         this.name = key;
         this.rooms = {}
         this.curRoomKey = null;
+        this.emitter = EventDispatcher.getInstance();
     }
 
     /*
@@ -75,6 +77,24 @@ class GameScene extends Phaser.Scene {
             npc.afterGroupCreate();
         });
         this.rooms[key].npcGroup = this.npcGroup;
+
+        // Map Portals layer
+        this.rooms[key].portalsArr = [];
+        map.getObjectLayer('Portals').objects.forEach((obj) => {
+            let portal = new Portal(obj.x, obj.y, obj.width, obj.height, obj.name, obj.type);
+            this.rooms[key].portalsArr.push(portal);
+            if (this.rooms[portal.to_room] == null) {
+                this.createRoom(portal.to_room);
+            }
+        });
+
+        // Map Player Spawns layer
+        this.rooms[key].playerSpawns = {};
+        map.getObjectLayer("Player_Spawns").objects.forEach((obj) => {
+            let spawn_key = obj.name;
+            let spawn = new PlayerSpawn(obj.name, obj.x, obj.y);
+            this.rooms[key].playerSpawns[spawn_key] = spawn;
+        });
     }
 
     /*
@@ -94,40 +114,10 @@ class GameScene extends Phaser.Scene {
         this.cameras.main.setLerp(0.3, 0.3);
         this.cameras.main.alpha = 0;
 
-        // Init keyboard inputs
-        this.keys = {};
-        this.keys.key_q = this.input.keyboard.addKey("q");
-        this.keys.key_x = this.input.keyboard.addKey("x");
-        this.keys.key_p = this.input.keyboard.addKey("p");
-        this.keys.key_s = this.input.keyboard.addKey("s");
-        this.keys.key_k = this.input.keyboard.addKey("k");
-        this.keys.key_j = this.input.keyboard.addKey("j");
-        let cur_keys = this.input.keyboard.createCursorKeys();
-        this.keys.key_up = cur_keys.up;
-        this.keys.key_down = cur_keys.down;
-        this.keys.key_left = cur_keys.left;
-        this.keys.key_right = cur_keys.right;
+        this.initKeyboard();
 
         this.createRoom(scenes.ROOM1);
         this.createMap(scenes.ROOM1);
-
-        // // Map Portals layer
-        // this.portalsArr = [];
-        // map.getObjectLayer('Portals').objects.forEach((obj) => {
-        //     let portal = new Portal(obj.x, obj.y, obj.width, obj.height, obj.name, obj.type);
-        //     this.portalsArr.push(portal);
-        //     // if (this.scene.get(portal.to_room) == null) {
-        //     //     this.scene.add(portal.to_room, new GameScene(portal.to_room, this.player), false);
-        //     // }
-        // });
-
-        // // Map Player Spawns layer
-        // this.playerSpawns = {};
-        // map.getObjectLayer("Player_Spawns").objects.forEach((obj) => {
-        //     let key = obj.name;
-        //     let spawn = new PlayerSpawn(obj.name, obj.x, obj.y);
-        //     this.playerSpawns[key] = spawn;
-        // })
 
         this.populateMap(scenes.ROOM1);
         this.generatePhysics(scenes.ROOM1);
@@ -137,26 +127,7 @@ class GameScene extends Phaser.Scene {
         this.populateMap(scenes.ROOM2);
         this.generatePhysics(scenes.ROOM2);
 
-        this.events.on('transitionout', () => {
-            // console.log(this.name + ": transition out");
-            this.cameras.main.fadeOut(0);
-        })
-        this.events.on('transitionstart', () => {
-            // console.log(this.name + ": transition started");
-            // this.cameras.main.fadeOut(0);
-        });
-        this.events.on('transitioncomplete', () => {
-            // console.log(this.name + ": transition complete");
-            this.cameras.main.alpha = 1;
-            this.cameras.main.fadeIn(500, 0, 0, 0, (cam, p) => {
-                if (p > 0.99) {
-                    this.cameras.main.alpha = 1;
-                }
-            });
-            for (let k of Object.values(this.keys)) {
-                k.reset(); // Reset keys in between scene change.
-            };
-        });
+        this.registerEvents();
     }
 
     // Should only be called once 
@@ -196,7 +167,11 @@ class GameScene extends Phaser.Scene {
             this.transitionRoom(scenes.ROOM2);
         } else if (Phaser.Input.Keyboard.JustDown(this.keys.key_j)) {
             this.transitionRoom(scenes.ROOM1);
-        } 
+        } else if (Phaser.Input.Keyboard.JustDown(this.keys.key_i)) {
+            this.player.setActive(this.player.inactive);
+        } else if (Phaser.Input.Keyboard.JustDown(this.keys.key_r)) {
+            this.player.jumpToPos(10, 10);
+        }
 
         // Update NPCs
         this.npcGroup.getChildren().forEach((npcSprite) => {
@@ -223,6 +198,7 @@ class GameScene extends Phaser.Scene {
             if (p > 0.99) {
                 this.switchRoom(key);
                 this.cameras.main.fadeIn(200, 10, 10, 10);
+                this.emitter.emit(events.ROOM_TRANSITION_END);
             }}
         );
     }
@@ -253,6 +229,50 @@ class GameScene extends Phaser.Scene {
         }
         this.npcGroup = room.npcGroup;
         this.curRoomKey = key;
+    }
+
+    initKeyboard() {
+        // Init keyboard inputs
+        this.keys = {};
+        this.keys.key_q = this.input.keyboard.addKey("q");
+        this.keys.key_x = this.input.keyboard.addKey("x");
+        this.keys.key_p = this.input.keyboard.addKey("p");
+        this.keys.key_s = this.input.keyboard.addKey("s");
+        this.keys.key_k = this.input.keyboard.addKey("k");
+        this.keys.key_j = this.input.keyboard.addKey("j");
+        this.keys.key_i = this.input.keyboard.addKey("i");
+        this.keys.key_r = this.input.keyboard.addKey("r");
+        let cur_keys = this.input.keyboard.createCursorKeys();
+        this.keys.key_up = cur_keys.up;
+        this.keys.key_down = cur_keys.down;
+        this.keys.key_left = cur_keys.left;
+        this.keys.key_right = cur_keys.right;
+    }
+
+    registerEvents() {
+        this.events.on('transitionout', () => {
+            // console.log(this.name + ": transition out");
+            this.cameras.main.fadeOut(0);
+        })
+        this.events.on('transitionstart', () => {
+            // console.log(this.name + ": transition started");
+            // this.cameras.main.fadeOut(0);
+        });
+        this.events.on('transitioncomplete', () => {
+            // console.log(this.name + ": transition complete");
+            this.cameras.main.alpha = 1;
+            this.cameras.main.fadeIn(500, 0, 0, 0, (cam, p) => {
+                if (p > 0.99) {
+                    this.cameras.main.alpha = 1;
+                }
+            });
+            for (let k of Object.values(this.keys)) {
+                k.reset(); // Reset keys in between scene change.
+            };
+        });
+        this.emitter.on(events.ROOM_TRANSITION_START, (to_room) => {
+            this.transitionRoom(to_room);
+        });
     }
 
 }
