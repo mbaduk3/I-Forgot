@@ -1,4 +1,4 @@
-import { assets, scenes } from '../constants/GameConstants'
+import { assets, scenes, constAnims } from '../constants/GameConstants'
 import NPC from '../characters/NPC';
 import Player from '../characters/Player';
 
@@ -31,12 +31,14 @@ export class Preload extends Phaser.Scene {
     create() {
         // Create global animations
         this.anims.create({
-            key: 'interact', 
-            frames: this.anims.generateFrameNames('interact_x', {start: 0, end: 1}),
+            key: constAnims.INTERACT_X, 
+            frames: this.anims.generateFrameNames(assets.INTERACT_X, {start: 0, end: 1}),
             frameRate: 3,
             repeat: -1,
         });
         Player.createAnims(this);
+        NPC.createAnims(this, assets['BEAR']);
+        NPC.createAnims(this, assets['MOUSE']);
 
         // Launch main menu
         this.scene.launch(scenes.MAIN_MENU);

@@ -1,5 +1,6 @@
-class NPC extends Phaser.GameObjects.GameObject {
+import { assets, constAnims } from '../constants/GameConstants'
 
+class NPC extends Phaser.GameObjects.GameObject {
 
     constructor(name, scene, x, y, id) {
         super(scene, 'npc');
@@ -20,10 +21,10 @@ class NPC extends Phaser.GameObjects.GameObject {
         scene.load.json(name + '_json', 'assets/Dialog/' + name + '.json');
     }
 
-    create() {
+    create() { 
         // Interact
-        this.interact_sprite = this.scene.add.sprite(this.x, this.y - 16, 'interact');
-        this.interact_sprite.play('interact');
+        this.interact_sprite = this.scene.physics.add.sprite(this.x, this.y - 16, assets.INTERACT_X);
+        this.interact_sprite.play(constAnims.INTERACT_X);
         this.interact_sprite.setVisible(false);
         this.interact_sprite.depth = 1000;
 
@@ -32,45 +33,7 @@ class NPC extends Phaser.GameObjects.GameObject {
 
         // Physics
         this.sprite = this.scene.physics.add.sprite(this.x, this.y, this.name + '_sprite_' + this.id);
-
-        // Anims
-        this.scene.anims.create({
-            key: this.name + '_walk_down',
-            frames: this.scene.anims.generateFrameNames(this.name + '_sheet', {start:0, end:3}),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.scene.anims.create({
-            key: this.name + '_idle_down',
-            frames: this.scene.anims.generateFrameNames(this.name + '_sheet', {start: 1, end: 1}),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.scene.anims.create({
-            key: this.name + '_walk_left',
-            frames: this.scene.anims.generateFrameNames(this.name + '_sheet', {start:4, end:7}),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.scene.anims.create({
-            key: this.name + '_idle_left',
-            frames: this.scene.anims.generateFrameNames(this.name + '_sheet', {start: 5, end: 5}),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.scene.anims.create({
-            key: this.name + '_walk_up',
-            frames: this.scene.anims.generateFrameNames(this.name + '_sheet', {start:8, end:11}),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.scene.anims.create({
-            key: this.name + '_idle_up',
-            frames: this.scene.anims.generateFrameNames(this.name + '_sheet', {start: 9, end: 9}),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.sprite.play(this.name + '_idle_down');
+        this.sprite.play(this.name + '_idle_down', true);
 
         // Dialog
         this.dialog = this.scene.cache.json.get(this.name + '_json');
@@ -101,7 +64,11 @@ class NPC extends Phaser.GameObjects.GameObject {
         this.sprite.parent = this;
     }
 
-    update() {
+    update(time, delta) {
+
+        this.sprite.preUpdate(time, delta);
+        this.interact_sprite.preUpdate(time, delta);
+        
         if (this.canInteract) {
             this.interact_sprite.setVisible(true);
             if (Phaser.Input.Keyboard.JustDown(this.key_x)) {
@@ -159,6 +126,45 @@ class NPC extends Phaser.GameObjects.GameObject {
             }
         }
         this.sprite.depth = this.sprite.y;
+    }
+
+    static createAnims(scene, name) {
+        scene.anims.create({
+            key: name + '_walk_down',
+            frames: scene.anims.generateFrameNumbers(name + '_sheet', {start:0, end:3}),
+            frameRate: 8,
+            repeat: -1
+        });
+        scene.anims.create({
+            key: name + '_idle_down',
+            frames: scene.anims.generateFrameNames(name + '_sheet', {start: 1, end: 1}),
+            frameRate: 8,
+            repeat: -1
+        });
+        scene.anims.create({
+            key: name + '_walk_left',
+            frames: scene.anims.generateFrameNames(name + '_sheet', {start:4, end:7}),
+            frameRate: 8,
+            repeat: -1
+        });
+        scene.anims.create({
+            key: name + '_idle_left',
+            frames: scene.anims.generateFrameNames(name + '_sheet', {start: 5, end: 5}),
+            frameRate: 8,
+            repeat: -1
+        });
+        scene.anims.create({
+            key: name + '_walk_up',
+            frames: scene.anims.generateFrameNames(name + '_sheet', {start:8, end:11}),
+            frameRate: 8,
+            repeat: -1
+        });
+        scene.anims.create({
+            key: name + '_idle_up',
+            frames: scene.anims.generateFrameNames(name + '_sheet', {start: 9, end: 9}),
+            frameRate: 8,
+            repeat: -1
+        });
     }
 
 }

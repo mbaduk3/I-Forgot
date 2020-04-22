@@ -26,4 +26,10 @@ export const constAnims = {
         IDLE_LEFT: "hedgehog_idle_left",
         IDLE_UP: "hedgehog_idle_up",
     },
+    INTERACT_X: "interact",
+}
+
+export const events = {
+    ROOM_TRANSITION_START: "roomtransitionstart",
+    ROOM_TRANSITION_END: "roomtransitionend",
 }
