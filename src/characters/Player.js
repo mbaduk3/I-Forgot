@@ -23,6 +23,8 @@ class Player {
     // Adds the player to the scene's current room. 
     create() {
 
+        let room = this.scene.rooms[this.scene.curRoomKey];
+
         // Physics
         this.sprite = this.scene.physics.add.sprite(this.x, this.y, assets.PLAYER_SPRITESHEET);
         this.sprite.body.debugShowBody = true;
@@ -50,7 +52,9 @@ class Player {
 
         this.emitter.on(events.ROOM_TRANSITION_END, () => {
             let room = this.scene.rooms[this.scene.curRoomKey];
-            this.jumpToPos(room.playerSpawns[this.to_spawn].x, room.playerSpawns[this.to_spawn].y);
+            if (this.to_spawn != null)  {
+                this.jumpToPos(room.playerSpawns[this.to_spawn].x, room.playerSpawns[this.to_spawn].y);
+            }
             this.setActive(true);
         });
 

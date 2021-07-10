@@ -5,6 +5,7 @@ import PlayerSpawn from '../objects/PlayerSpawn'
 import { scenes, constAnims, events } from '../constants/GameConstants'
 import Room from "../aux/Room";
 import EventDispatcher from '../aux/EventDispatcher'
+import DialogModalPlugin from '../objects/DialogModalPlugin'
 
 /* 
     The main gameplay scene. 
@@ -43,6 +44,8 @@ class GameScene extends Phaser.Scene {
         this.rooms[key].updateList = new Phaser.GameObjects.UpdateList(this);
         this.rooms[key].physics.bodies = new Phaser.Structs.Set();
         this.rooms[key].physics.staticBodies = new Phaser.Structs.Set();
+        this.rooms[key].debugGraphic = this.physics.world.createDebugGraphic();
+        this.curRoomKey = key;
     }
 
     /*
@@ -54,7 +57,6 @@ class GameScene extends Phaser.Scene {
         let map = this.make.tilemap({key: key + "_map"});
         let tileset = map.addTilesetImage(key + "_tiles");
         map.createStaticLayer("Base", tileset);
-
         this.physics.world.bounds.setTo(0, 0, map.widthInPixels, map.heightInPixels);
         this.rooms[key].map = map;
     }
@@ -84,7 +86,7 @@ class GameScene extends Phaser.Scene {
             let portal = new Portal(obj.x, obj.y, obj.width, obj.height, obj.name, obj.type);
             this.rooms[key].portalsArr.push(portal);
             if (this.rooms[portal.to_room] == null) {
-                this.createRoom(portal.to_room);
+                this.generateRoom(portal.to_room);
             }
         });
 
@@ -106,33 +108,48 @@ class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.player.sprite, this.npcGroup);
     }
 
+    preload()  {
+        this.load.scenePlugin({
+            key: "DialogModalPlugin",
+            url: 'DialogModalPlugin.js',
+            sceneKey: 'dialogModal'
+        });
+    }
+
     create() {
-        this.initPlayer();
-        
+
+        this.dialogModal.init();
+
         // Init camera
         this.cameras.main.setZoom(3.5);
         this.cameras.main.setLerp(0.3, 0.3);
         this.cameras.main.alpha = 0;
 
+        this.initPlayer();
         this.initKeyboard();
-
-        this.createRoom(scenes.ROOM1);
-        this.createMap(scenes.ROOM1);
-
-        this.populateMap(scenes.ROOM1);
-        this.generatePhysics(scenes.ROOM1);
-
-        this.createRoom(scenes.ROOM2);
-        this.createMap(scenes.ROOM2);
-        this.populateMap(scenes.ROOM2);
-        this.generatePhysics(scenes.ROOM2);
-
+        this.generateRoom(scenes.ROOM1);
         this.registerEvents();
     }
 
     // Should only be called once 
     initPlayer() {
         this.player = new Player(this, 0, 0);
+    }
+
+    /*
+        Creates and populates the room specified by [key]. 
+        Use this method to fully add a room to the game. 
+        Note: does not switch to the new room. 
+    */
+    generateRoom(key) {
+        let cur_room = this.curRoomKey;
+        this.createRoom(key);
+        this.createMap(key);
+        this.populateMap(key);
+        this.generatePhysics(key);
+        if (cur_room != null) {
+            this.switchRoom(cur_room);
+        }
     }
 
     // Called once in the initialization of each room.
@@ -212,9 +229,14 @@ class GameScene extends Phaser.Scene {
         let room = this.rooms[key];
         this.sys.displayList = room.displayList;
         this.sys.updateList = room.updateList;
+        this.add.displayList = room.displayList;
+        this.add.updateList = room.updateList;
+        // this.add.displayList.each(c =>  this.sys.displayList.add(c));
+        // this.add.displayList = this.sys.displayList;
         this.children = room.displayList;
         this.physics.world.bodies = room.physics.bodies;
         this.physics.world.staticBodies = room.physics.staticBodies;
+        this.physics.world.debugGraphic = room.debugGraphic;
         let map = this.rooms[key].map;
         if (map != null) {
             this.physics.world.bounds.setTo(0, 0, map.widthInPixels, map.heightInPixels);

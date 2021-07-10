@@ -50,8 +50,9 @@ class NPC extends Phaser.GameObjects.GameObject {
         this.scene.time.addEvent(randomWalkConfig);
     }
 
-    /* Phaser wipes npc data after you add it to a group? So this sets stuff 
-       after it is added.
+    /* 
+        Phaser wipes npc data after you add it to a group? So this sets stuff 
+        after it is added.
     */
     afterGroupCreate() {
         this.sprite.body.setSize(10, 8);

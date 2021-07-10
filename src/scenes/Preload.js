@@ -26,6 +26,8 @@ export class Preload extends Phaser.Scene {
         // Preload TileMaps
         this.load.tilemapTiledJSON(assets.rooms.ROOM1+ "_map", 'assets/Maps/' + assets.rooms.ROOM1 + "_map.json");
         this.load.tilemapTiledJSON(assets.rooms.ROOM2+ "_map", 'assets/Maps/' + assets.rooms.ROOM2 + "_map.json");
+        // Preload Plugins
+        // this.load.plugin('DialogModalPlugin', 'DialogModalPlugin.js');
     }
 
     create() {

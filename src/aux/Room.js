@@ -20,6 +20,7 @@ class Room {
         this.npcGroup = null;
         this.portalsArr = null;
         this.playerSpawns = null;
+        this.debugGraphic = null;
     }
 
 }
