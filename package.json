@@ -17,6 +17,6 @@
   },
   "dependencies": {
     "phaser": "^3.2.0",
-    "phaser3-rex-plugins": "^1.1.8"
+    "phaser3-rex-plugins": "^1.1.79"
   }
 }
